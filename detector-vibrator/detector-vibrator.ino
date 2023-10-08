@@ -1,7 +1,7 @@
 const int trigger = 17; // OUTPUT to sensor //18
 const int echo = 16; // INPUT from sensor //5
  // OUTPUT to buzzer //21
-const int THUMB = 4;
+const int THUMB = 3;
 const int INDEX_FINGER = 5;
 const int MIDDLE_FINGER = 6;
 const int RING_FINGER = 7;
@@ -23,7 +23,7 @@ int period = 1000;
 
 float calculate_frequency(float distance);
 bool check_distance(float distance);
-int init_ultrasonic_sensor(float distanceCm);
+int init_ultrasonic_sensor();
 
 void setup() {
   // put your setup code here, to run once:
@@ -59,7 +59,7 @@ void loop() {
   }
 
   // initialize ultrasonic sensor
-  period =  init_ultrasonic_sensor(distanceCm);
+  period =  init_ultrasonic_sensor();
 
   Serial.print(distanceCm);
   Serial.print('\t');
@@ -69,7 +69,7 @@ void loop() {
   float temp_period;
   while (millis() < time_now + period) {
     // initialize ultrasonic sensor
-    temp_period =  init_ultrasonic_sensor(distanceCm);
+    temp_period =  init_ultrasonic_sensor();
 
     // If current period is less than old period, replace it
     if (temp_period < period) {
@@ -83,7 +83,7 @@ void loop() {
 
 }
 
-int init_ultrasonic_sensor(float distance){
+int init_ultrasonic_sensor(){
     digitalWrite(trigger, LOW);
     delayMicroseconds(2);
     digitalWrite(trigger, HIGH);
@@ -91,8 +91,9 @@ int init_ultrasonic_sensor(float distance){
     digitalWrite(trigger, LOW); 
     
     duration = pulseIn(echo, HIGH);
-    distance = duration * SOUND_SPEED/2;
-    return calculate_frequency(distance);
+    distanceCm = duration * SOUND_SPEED/2;
+   
+    return calculate_frequency(distanceCm);
 }
 
 
