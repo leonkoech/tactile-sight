@@ -11,16 +11,26 @@ const int vibration = 21;
 #define SREG (*((volatile uint8_t *)0x5F))
 
 
-
 long duration;
 float distanceCm;
+
+int motorState = LOW;
 
 // function definition (prototype)
 boolean check_distance(float distance);
 
+<<<<<<< HEAD:detector-vibrator.ino
 void genericDelay(unsigned int time_ms);
 
  void delay_1ms();
+=======
+// time (milliseconds) since last update
+unsigned long previousMillis = 0;
+
+const long scanInterval = 500; // (delay in milliseconds)
+long vibrateInterval = 1000;
+long vibrateMult = 1;
+>>>>>>> 850f845ba78770838a410438bc1e2b29a659ce57:detector-vibrator/detector-vibrator.ino
 
 void setup() {
   // put your setup code here, to run once:
@@ -32,26 +42,33 @@ void setup() {
 }
 
 void loop() {
+  // unsigned long currentMillis = millis();
+  
   digitalWrite(trigger, LOW);
   delayMicroseconds(2);
 
   digitalWrite(trigger, HIGH);
-  delayMicroseconds(10);
   digitalWrite(trigger, LOW);
 
   duration = pulseIn(echo, HIGH);
 
   distanceCm = duration * SOUND_SPEED/2;
+  float currentDistance = distanceCm;
 
   if(check_distance(distanceCm)){
+    // motorState = HIGH;
+    delay(distanceCm *5);
     digitalWrite(vibration, HIGH);
+    Serial.println(distanceCm);
   }
   else{
+    // motorState = LOW;
     digitalWrite(vibration, LOW);
   }
-
+  
   Serial.print("distance cm: ");
   Serial.println(distanceCm);
+<<<<<<< HEAD:detector-vibrator.ino
 
 }
 
@@ -76,4 +93,12 @@ void genericDelay(unsigned int time_ms){
 
 boolean check_distance(float distance){
   return distance>3 && distance<30;
+=======
+  
+  delay(scanInterval);
+}
+
+boolean check_distance(float distance){
+  return distance>3 && distance<20;
+>>>>>>> 850f845ba78770838a410438bc1e2b29a659ce57:detector-vibrator/detector-vibrator.ino
 }
