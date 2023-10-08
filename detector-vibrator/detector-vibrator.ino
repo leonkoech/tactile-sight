@@ -1,104 +1,108 @@
+const int trigger = 17; // OUTPUT to sensor //18
+const int echo = 16; // INPUT from sensor //5
+ // OUTPUT to buzzer //21
+const int THUMB = 4;
+const int INDEX_FINGER = 5;
+const int MIDDLE_FINGER = 6;
+const int RING_FINGER = 7;
+const int PINKY_FINGER = 8;
 
-#include <stdint.h>
+const int buzzerPins[5] = {THUMB, INDEX_FINGER, MIDDLE_FINGER, RING_FINGER, PINKY_FINGER};
+const int BUZZ_TIME = 300;
+const int k = 20;
+const int MAX_DISTANCE = 150;
+const int MIN_DISTANCE = 2;
 
 
-const int trigger = 18;
-const int echo = 5;
-const int vibration = 21;
-
-// sound speed in cm/ micro second
 #define SOUND_SPEED 0.034
-#define SREG (*((volatile uint8_t *)0x5F))
-
 
 long duration;
-float distanceCm;
+float distanceCm = 0;
+unsigned long time_now = 0;
+int period = 1000;
 
-int motorState = LOW;
-
-// function definition (prototype)
-boolean check_distance(float distance);
-
-<<<<<<< HEAD:detector-vibrator.ino
-void genericDelay(unsigned int time_ms);
-
- void delay_1ms();
-=======
-// time (milliseconds) since last update
-unsigned long previousMillis = 0;
-
-const long scanInterval = 500; // (delay in milliseconds)
-long vibrateInterval = 1000;
-long vibrateMult = 1;
->>>>>>> 850f845ba78770838a410438bc1e2b29a659ce57:detector-vibrator/detector-vibrator.ino
+float calculate_frequency(float distance);
+bool check_distance(float distance);
+int init_ultrasonic_sensor(float distanceCm);
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(trigger, OUTPUT);
   pinMode(echo, INPUT);
-  pinMode(vibration, OUTPUT);
-
+  for (int i = 0; i < 5; i++){
+    pinMode(buzzerPins[i], OUTPUT);
+  }
 }
 
 void loop() {
-  // unsigned long currentMillis = millis();
-  
-  digitalWrite(trigger, LOW);
-  delayMicroseconds(2);
+  // put your main code here, to run repeatedly:
 
-  digitalWrite(trigger, HIGH);
-  digitalWrite(trigger, LOW);
+  // Get current time, for measurement purposes in loop
+  time_now = millis();
 
-  duration = pulseIn(echo, HIGH);
-
-  distanceCm = duration * SOUND_SPEED/2;
-  float currentDistance = distanceCm;
-
-  if(check_distance(distanceCm)){
-    // motorState = HIGH;
-    delay(distanceCm *5);
-    digitalWrite(vibration, HIGH);
-    Serial.println(distanceCm);
+  // Make buzzer do buzz for .2 seconds
+  int finger_count = sizeof(buzzerPins);
+  if (check_distance(distanceCm)) {
+    for(int i = 0; i < finger_count; i++){
+      digitalWrite(buzzerPins[i], HIGH);
+    }
+    delay(BUZZ_TIME);
+    for(int i = 0; i < finger_count; i++){
+      digitalWrite(buzzerPins[i], LOW);
+    }
   }
   else{
-    // motorState = LOW;
-    digitalWrite(vibration, LOW);
+    for(int i = 0; i < finger_count; i++){
+      digitalWrite(buzzerPins[i], LOW);
+    }
   }
-  
-  Serial.print("distance cm: ");
-  Serial.println(distanceCm);
-<<<<<<< HEAD:detector-vibrator.ino
+
+  // initialize ultrasonic sensor
+  period =  init_ultrasonic_sensor(distanceCm);
+
+  Serial.print(distanceCm);
+  Serial.print('\t');
+  Serial.println(period);
+  // For the set period that it should delay on, wait.
+  // While waiting, check if distance has decreased
+  float temp_period;
+  while (millis() < time_now + period) {
+    // initialize ultrasonic sensor
+    temp_period =  init_ultrasonic_sensor(distanceCm);
+
+    // If current period is less than old period, replace it
+    if (temp_period < period) {
+      period = temp_period;
+    }
+
+    delay(100);
+
+  } // End of while loop
+
 
 }
 
- void delay_1ms(){
-
-  uint8_t oldSREG = SREG;
-  cli();
-  TCNT2 = 0x06;
-  TCCR2A = 0x00;
-  TCCR2B = 0x04;
-  while((TIFR2 & 0x01) == 0); 
-  TCCR2B = 0x00;
-  TIFR2 = 0x1;
-  SREG = oldSREG;
+int init_ultrasonic_sensor(float distance){
+    digitalWrite(trigger, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigger, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigger, LOW); 
+    
+    duration = pulseIn(echo, HIGH);
+    distance = duration * SOUND_SPEED/2;
+    return calculate_frequency(distance);
 }
 
-void genericDelay(unsigned int time_ms){
-  for(unsigned long counter=0; counter < time_ms; counter++){
-    delay_1ms();
+
+float calculate_frequency(float distance) {
+  if (check_distance(distance)) {
+    return k * distance;
   }
+  return 5000;
 }
 
-boolean check_distance(float distance){
-  return distance>3 && distance<30;
-=======
-  
-  delay(scanInterval);
-}
-
-boolean check_distance(float distance){
-  return distance>3 && distance<20;
->>>>>>> 850f845ba78770838a410438bc1e2b29a659ce57:detector-vibrator/detector-vibrator.ino
+bool check_distance(float distance){
+  return distance > MIN_DISTANCE && distance < MAX_DISTANCE;
 }
