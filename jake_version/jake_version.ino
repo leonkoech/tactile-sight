@@ -15,6 +15,7 @@ int period = 1000;
 
 float calculate_frequency(float distance);
 bool check_distance(float distance);
+int init_ultrasonic_sensor(float distanceCm);
 
 void setup() {
   // put your setup code here, to run once:
@@ -40,17 +41,8 @@ void loop() {
     digitalWrite(vibration, LOW);
   }
 
-  // Do distance check
-  digitalWrite(trigger, LOW);
-  delayMicroseconds(2);
-
-  digitalWrite(trigger, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigger, LOW); 
-
-  duration = pulseIn(echo, HIGH);
-  distanceCm = duration * SOUND_SPEED/2;
-  period = calculate_frequency(distanceCm);
+  // initialize ultrasonic sensor
+  period =  init_ultrasonic_sensor(distanceCm);
 
   Serial.print(distanceCm);
   Serial.print('\t');
@@ -59,17 +51,8 @@ void loop() {
   // While waiting, check if distance has decreased
   float temp_period;
   while (millis() < time_now + period) {
-
-    digitalWrite(trigger, LOW);
-    delayMicroseconds(2);
-
-    digitalWrite(trigger, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigger, LOW); 
-
-    duration = pulseIn(echo, HIGH);
-    distanceCm = duration * SOUND_SPEED/2;
-    temp_period = calculate_frequency(distanceCm);
+    // initialize ultrasonic sensor
+    temp_period =  init_ultrasonic_sensor(distanceCm);
 
     // If current period is less than old period, replace it
     if (temp_period < period) {
@@ -83,6 +66,19 @@ void loop() {
 
 }
 
+int init_ultrasonic_sensor(float distance){
+    digitalWrite(trigger, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigger, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigger, LOW); 
+    
+    duration = pulseIn(echo, HIGH);
+    distance = duration * SOUND_SPEED/2;
+    return calculate_frequency(distance);
+}
+
+
 float calculate_frequency(float distance) {
   if (check_distance(distance)) {
     return k * distance;
@@ -93,5 +89,3 @@ float calculate_frequency(float distance) {
 bool check_distance(float distance){
   return distance > MIN_DISTANCE && distance < MAX_DISTANCE;
 }
-
-
