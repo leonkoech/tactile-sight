@@ -52,6 +52,8 @@ Provides a description of the layout points, surfaces, and objects in the world.
 
 [![Tacti-sight at knight hacks 2023](https://github.com/leonkoech/tactile-sight/assets/39020723/45f6bda3-949a-4c31-8cc3-3febaefd7349)](https://youtu.be/DaEQ_TnlU9k "Tacti-sight at knight hacks 2023")
 
+### [Click Here for video](https://youtu.be/DaEQ_TnlU9k "Tacti-sight at knight hacks 2023")
+
 ## Resources Used
 - ESP WROOM 32 - ideation, conceptualization, and proof of concept
 - ARDUINO NANO -  Most viable product
